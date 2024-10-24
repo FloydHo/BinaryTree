@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace BinaryTree
 {
     public class BTree<T> : IBinaryTree<T> where T : IComparable<T>
     {
-        private BinaryTreeNode<T> _root;
+        private BinaryTreeNode<T>? _root;
 
         public BTree(params T[] arr)
         {
@@ -79,14 +80,14 @@ namespace BinaryTree
 
         public void Delete(T value)
         {
-            BinaryTreeNode<T> deleteThis = Search(value);
+            BinaryTreeNode<T> deleteThis = default!;
+
+            if (_root != null && _root.Data.Equals(value)) deleteThis = _root;
+            else deleteThis = PrepareDelete(value, _root!);
+
             if (deleteThis == null) return;
             
-            if (deleteThis.Left == null && deleteThis.Right == null)            //Kann Safe gelöscht werden da es keine Folgeknoten gibt.
-            {
-                deleteThis = null!;
-            }
-            else if (deleteThis.Left != null && deleteThis.Right == null)       //Wenn links belegt und rechts frei ist kann der Folgeknoten einfach ersetzt werde, das selbe mit rechts.
+            if (deleteThis.Left != null && deleteThis.Right == null)       //Wenn links belegt und rechts frei ist kann der Folgeknoten einfach ersetzt werde, das selbe mit rechts.
             {
                 Replace(deleteThis, deleteThis.Left);
             }
@@ -100,6 +101,63 @@ namespace BinaryTree
             }
         }
 
+        private BinaryTreeNode<T> PrepareDelete(T value, BinaryTreeNode<T> node)
+        {
+            int compare = value.CompareTo(node.Data);
+            switch (compare)
+            {
+                case -1:
+                    if (node.Left == null) return null!;
+                    else if (node.Left.Data.Equals(value))
+                    {
+                        if (TryUnlink(node.Left))
+                        {
+                            node.Left = null!;
+                            return null!;
+                        }
+                        return node.Left;
+                    }
+                    else return PrepareDelete(value, node.Left);
+                case 1:
+                    if (node.Right == null) return null!;
+                    else if (node.Right.Data.Equals(value))
+                    {
+                        if (TryUnlink(node.Right))
+                        {
+                            node.Right = null!;
+                            return null!;
+                        }
+                        return node.Right;
+                    }
+                    else return PrepareDelete(value, node.Right);
+                default: return null!;
+            }
+        }
+
+        //private BinaryTreeNode<T> CheckNode(T value, BinaryTreeNode<T> node)
+        //{
+        //    if (node.Right == null) return null!;
+        //    else if (node.Right.Data.Equals(value))
+        //    {
+        //        if (TryUnlink(node.Right))
+        //        {
+        //            node.Left = null!;
+        //            return null!;
+        //        }
+        //        return node.Right;
+        //    }
+        //    else return PrepareDelete(value, node.Right);
+        //}
+
+        private bool TryUnlink(BinaryTreeNode<T> node)
+        {
+            if (node.Left == null && node.Right == null)
+            {
+                return true;
+            }
+            return false;
+        }
+
         private void Replace(BinaryTreeNode<T> oldNode, BinaryTreeNode<T> replacementNode)
         {
             oldNode.Data = replacementNode.Data;
@@ -111,7 +169,7 @@ namespace BinaryTree
         {
             BinaryTreeNode<T> replacementNode;
             if (checkNode.Right == null && checkNode.Left == null)
-            {     
+            {  
                return checkNode;
             }
             else if (checkNode.Right == null && checkNode.Left != null)
@@ -132,25 +190,9 @@ namespace BinaryTree
             return null!;
         }
 
-        private BinaryTreeNode<T> GetPrev(BinaryTreeNode<T> deleteNode, BinaryTreeNode<T> current)
-        {
-            int compare = deleteNode.Data.CompareTo(current.Data);
-            switch (compare)
-            {
-                case -1:
-                    if (deleteNode.Data.CompareTo(current.Left.Data) == 0) return current;
-                    else return GetPrev(deleteNode, current.Left);
-                case 0: //Sollte nie zutreffen
-                case 1:
-                    if (deleteNode.Data.CompareTo(current.Right.Data) == 0) return current;
-                    else return GetPrev(deleteNode, current.Right);
-                default: return null!;
-            }
-        }
-
         public void PrintInorder()
         {
-            PrintInorder(_root);
+            PrintInorder(_root!);
         }
 
         private void PrintInorder(BinaryTreeNode<T> node)
@@ -164,7 +206,7 @@ namespace BinaryTree
             }
         }
 
-        public BinaryTreeNode<T> Search(T value)                                //Gibt die Referenz zum aktuellen Objekt, nicht die beste Wahl :D
+        public BinaryTreeNode<T> Search(T value)   //Gibt die Referenz zum aktuellen Objekt anstatt eine Kopie zurück, nicht das beste ich weiß :D
         {
             if (_root.Data.Equals(value))
             {
@@ -173,7 +215,7 @@ namespace BinaryTree
             return Search(value, _root);
         }
 
-        public BinaryTreeNode<T> Search(T value, BinaryTreeNode<T> node)
+        private BinaryTreeNode<T> Search(T value, BinaryTreeNode<T> node)
         {
             int compare = value.CompareTo(node.Data);
             switch (compare)

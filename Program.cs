@@ -21,6 +21,11 @@
             theTree.Delete(15);
             Console.Write("\n\n15 gelöscht:");
             Console.WriteLine();
+            theTree.PrintInorder();
+
+            theTree.Delete(61);
+            Console.Write("\n\n61 gelöscht:");
+            Console.WriteLine();
 
             theTree.PrintInorder();
         }
