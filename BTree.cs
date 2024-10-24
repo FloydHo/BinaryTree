@@ -13,9 +13,13 @@ namespace BinaryTree
     {
         private BinaryTreeNode<T> _root;
 
-
-        public BTree() { }
-
+        public BTree(params T[] arr)
+        {
+            foreach(var  t in arr)
+            {
+                Insert(t);
+            }
+        }
 
         public void Insert(T value)
         {
@@ -77,48 +81,55 @@ namespace BinaryTree
         {
             BinaryTreeNode<T> deleteThis = Search(value);
             if (deleteThis == null) return;
-            else if (deleteThis.Left == null && deleteThis.Right == null)  //Kann Safe gelöscht werden da es keine Folgeknoten gibt.
+            
+            if (deleteThis.Left == null && deleteThis.Right == null)            //Kann Safe gelöscht werden da es keine Folgeknoten gibt.
             {
                 deleteThis = null!;
             }
-            else if (!deleteThis.Equals(_root))                             //Wird aufgerufen wenn es sich nicht um den _root Knoten handelt der gelöscht werden soll.
-            { 
-                Replace(deleteThis, GetPrev(deleteThis, _root));            
+            else if (deleteThis.Left != null && deleteThis.Right == null)       //Wenn links belegt und rechts frei ist kann der Folgeknoten einfach ersetzt werde, das selbe mit rechts.
+            {
+                Replace(deleteThis, deleteThis.Left);
+            }
+            else if (deleteThis.Left == null && deleteThis.Right != null)
+            {
+                Replace(deleteThis, deleteThis.Right);
+            }
+            else                        
+            {
+                SearchReplacementNode(deleteThis, deleteThis.Left!);            
             }
         }
 
-        private void Replace(BinaryTreeNode<T> deleteNode, BinaryTreeNode<T> current) //current ist hier der Knoten vor dem Knoten der gelöscht werden soll 
+        private void Replace(BinaryTreeNode<T> oldNode, BinaryTreeNode<T> replacementNode)
         {
-            if (deleteNode.Left != null &&  deleteNode.Right == null)       //Wenn links belegt und rechts frei ist kann ich den folgeknoten einfach einsetzen, das selbe mit rechts.
-            {
-                switch (current.Data.CompareTo(deleteNode.Data))
-                {
-                    case -1:
-                        current.Left = deleteNode.Left;
-                        deleteNode = null!;
-                        break;
-                    case 1:
-                        current.Right = deleteNode.Left;
-                        deleteNode = null!;
-                        break;
-                }
+            oldNode.Data = replacementNode.Data;
+            oldNode.Left = replacementNode.Left;
+            oldNode.Right = replacementNode.Right;
+        }
+
+        private BinaryTreeNode<T> SearchReplacementNode(BinaryTreeNode<T> deleteNode, BinaryTreeNode<T> checkNode)
+        {
+            BinaryTreeNode<T> replacementNode;
+            if (checkNode.Right == null && checkNode.Left == null)
+            {     
+               return checkNode;
             }
-            else if (deleteNode.Left == null && deleteNode.Right != null)
+            else if (checkNode.Right == null && checkNode.Left != null)
             {
-                switch (current.Data.CompareTo(deleteNode.Data))
-                {
-                    case -1:
-                        current.Left = deleteNode.Right;
-                        deleteNode = null!;
-                        break;
-                    case 1:
-                        current.Right = deleteNode.Right;
-                        deleteNode = null!;
-                        break;
-                    default:
-                        break;
-                }
+                return checkNode;
             }
+            else 
+            {
+                replacementNode = SearchReplacementNode(deleteNode, checkNode.Right!);
+            }
+
+            if (replacementNode != null)
+            {
+                deleteNode.Data = replacementNode.Data;
+                checkNode.Right = replacementNode.Left;
+                
+            }
+            return null!;
         }
 
         private BinaryTreeNode<T> GetPrev(BinaryTreeNode<T> deleteNode, BinaryTreeNode<T> current)
@@ -137,7 +148,6 @@ namespace BinaryTree
             }
         }
 
-
         public void PrintInorder()
         {
             PrintInorder(_root);
@@ -149,12 +159,12 @@ namespace BinaryTree
             else
             {
                 PrintInorder(node.Left);
-                PrintInorder(node.Right);
                 Console.Write($"{node.Data} ");
+                PrintInorder(node.Right);
             }
         }
 
-        public BinaryTreeNode<T> Search(T value) //Gibt die Referenz zum aktuellen Objekt, nicht die beste Wahl :D
+        public BinaryTreeNode<T> Search(T value)                                //Gibt die Referenz zum aktuellen Objekt, nicht die beste Wahl :D
         {
             if (_root.Data.Equals(value))
             {
