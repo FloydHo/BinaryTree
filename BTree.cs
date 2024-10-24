@@ -57,7 +57,7 @@ namespace BinaryTree
 
         public bool Contains(T value)
         {
-            if (_root.Data.Equals(value)) return true;
+            if (_root!.Data.Equals(value)) return true;
             else return Contains(value, _root);
         }
 
@@ -200,15 +200,15 @@ namespace BinaryTree
             if (node == null) return;
             else
             {
-                PrintInorder(node.Left);
+                PrintInorder(node.Left!);
                 Console.Write($"{node.Data} ");
-                PrintInorder(node.Right);
+                PrintInorder(node.Right!);
             }
         }
 
         public BinaryTreeNode<T> Search(T value)   //Gibt die Referenz zum aktuellen Objekt anstatt eine Kopie zurück, nicht das beste ich weiß :D
         {
-            if (_root.Data.Equals(value))
+            if (_root!.Data.Equals(value))
             {
                 return _root;
             }
