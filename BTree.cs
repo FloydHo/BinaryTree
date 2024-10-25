@@ -37,7 +37,7 @@ namespace BinaryTree
                     if (current.Left == null) current.Left = new BinaryTreeNode<T>(value);  // ja: node wird initalisiert und eine Referenz auf Links gelegt
                     else Insert(value, current.Left);                                       // nein: überprüfe das referenzierte Linke Objekt indem die Methode sich selbst aufruft.
                     break;
-                case 0:         //Wenn der Wert gleich groß ist, default rechts überprüfen.
+                case 0:         //Wenn der Wert gleich groß ist, default rechts
                 case 1:
                     if (current.Right == null) current.Right = new BinaryTreeNode<T>(value);
                     else Insert(value, current.Right);
@@ -58,12 +58,12 @@ namespace BinaryTree
         {
             BinaryTreeNode<T> deleteThis = default!;
 
-            if (_root != null && value.Equals(_root.Data)) deleteThis = _root; //Checkt ob _root null ist oder der zu löschende Wert in _root ist.
-            else deleteThis = PrepareDelete(value, _root!);                 //PrepareDelete sucht sich die Node, die gelöscht werden soll (und löscht diese wenn Left & Right null sind) ansonsten gibt sie die node zurück. 
+            if (_root != null && value.Equals(_root.Data)) deleteThis = _root;  //Checkt ob _root null ist oder der zu löschende Wert in _root ist.
+            else deleteThis = PrepareDelete(value, _root!);                     //PrepareDelete sucht sich die Node, die gelöscht werden soll (und löscht diese wenn Left & Right null sind) ansonsten gibt sie die node zurück. 
 
             if (deleteThis == default) return;
 
-            if (deleteThis.Left == null && deleteThis.Right == null)        //Kann nur bei Root treffen da jede andere Möglichkeit in der Methode PrepareDelete abgefangen wird.
+            if (deleteThis.Left == null && deleteThis.Right == null)            //Kann nur bei Root treffen da jede andere Möglichkeit in der Methode PrepareDelete abgefangen wird.
             {
                 _root = null!;
             }
@@ -77,16 +77,7 @@ namespace BinaryTree
             }
             else                        
             {
-                //SearchReplacementNode(deleteThis, deleteThis.Left!);
-
-                //TODO: Mach das schöner
-                BinaryTreeNode<T> replacementNode = SearchReplacementNode(deleteThis, deleteThis.Left);
-                if (replacementNode != null)
-                {
-                    deleteThis.Data = replacementNode.Data;
-                    deleteThis.Left.Right = replacementNode.Left;
-
-                }
+                SearchReplacementNode(deleteThis);
             }
         }
 
@@ -135,16 +126,23 @@ namespace BinaryTree
             oldNode.Right = replacementNode.Right;
         }
 
+        private BinaryTreeNode<T> SearchReplacementNode(BinaryTreeNode<T> deleteNode) //Falls bei der ersten Iteration trifft muss die Linke Noder des zu löschenden Wertes getauscht werden
+        {
+            BinaryTreeNode<T> replacementNode = SearchReplacementNode(deleteNode, deleteNode.Left);
+            if (replacementNode != null)
+            {
+                deleteNode.Data = replacementNode.Data;
+                deleteNode.Left = replacementNode.Left;
+            }
+            return null;
+        }
+
         private BinaryTreeNode<T> SearchReplacementNode(BinaryTreeNode<T> deleteNode, BinaryTreeNode<T> checkNode)
         {
             BinaryTreeNode<T> replacementNode;
-            if (checkNode.Right == null && checkNode.Left == null)
+            if (checkNode.Right == null && checkNode.Left == null || checkNode.Right == null && checkNode.Left != null)
             {
-                return  checkNode;
-            }
-            else if (checkNode.Right == null && checkNode.Left != null)
-            {
-                return  checkNode;
+                return checkNode;
             }
             else 
             {
@@ -159,6 +157,7 @@ namespace BinaryTree
             }
             return null!;
         }
+
 
         public void PrintInorder()
         {

@@ -4,8 +4,8 @@
     {
         static void Main(string[] args)
         {
-            //AufgabePruefen();
-            TestString();
+            AufgabePruefen();
+            //TestString();
         }
 
         public static void AufgabePruefen()
@@ -26,15 +26,19 @@
             theTree.PrintInorder();
 
             theTree.Delete(15);
-            Console.Write("\n\n15 gelöscht:");
-            Console.WriteLine();
+            Console.Write("\n\n15 gelöscht:\n");
             theTree.PrintInorder();
 
             theTree.Delete(61);
-            Console.Write("\n\n61 gelöscht:");
-            Console.WriteLine();
+            Console.Write("\n\n61 gelöscht:\n");
 
             theTree.PrintInorder();
+            Console.WriteLine();
+
+            theTree.Delete(50);
+            Console.Write("\n\n50 gelöscht:\n");
+            theTree.PrintInorder();
+            Console.WriteLine();
         }
 
         public static void TestString()
