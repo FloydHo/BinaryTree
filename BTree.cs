@@ -37,7 +37,8 @@ namespace BinaryTree
         private void Insert(T value,BinaryTreeNode<T> current)
         {
             int compare = value.CompareTo(current.Data);
-            switch (compare) {
+            switch (compare) 
+            {
                 case -1:
                     if (current.Left == null) current.Left = new BinaryTreeNode<T>(value);
                     else Insert(value, current.Left);
@@ -63,18 +64,7 @@ namespace BinaryTree
 
         private bool Contains(T value, BinaryTreeNode<T> current)
         {
-            int compare = value.CompareTo(current.Data);
-            switch (compare)
-            {
-                case -1:
-                    if (current.Left == null) return false;
-                    else return Contains(value, current.Left);
-                case 0:
-                    return true;
-                case 1:
-                    if (current.Right == null) return false;
-                    else return Contains(value, current.Right);
-            }
+            if (Search(value) != null) return true;
             return false;
         }
 
@@ -107,47 +97,28 @@ namespace BinaryTree
             switch (compare)
             {
                 case -1:
-                    if (node.Left == null) return null!;
-                    else if (node.Left.Data.Equals(value))
-                    {
-                        if (TryUnlink(node.Left))
-                        {
-                            node.Left = null!;
-                            return null!;
-                        }
-                        return node.Left;
-                    }
-                    else return PrepareDelete(value, node.Left);
+                    return CheckNode(value, node, false);
                 case 1:
-                    if (node.Right == null) return null!;
-                    else if (node.Right.Data.Equals(value))
-                    {
-                        if (TryUnlink(node.Right))
-                        {
-                            node.Right = null!;
-                            return null!;
-                        }
-                        return node.Right;
-                    }
-                    else return PrepareDelete(value, node.Right);
+                    return CheckNode(value, node, true);
                 default: return null!;
             }
         }
 
-        //private BinaryTreeNode<T> CheckNode(T value, BinaryTreeNode<T> node)
-        //{
-        //    if (node.Right == null) return null!;
-        //    else if (node.Right.Data.Equals(value))
-        //    {
-        //        if (TryUnlink(node.Right))
-        //        {
-        //            node.Left = null!;
-        //            return null!;
-        //        }
-        //        return node.Right;
-        //    }
-        //    else return PrepareDelete(value, node.Right);
-        //}
+        private BinaryTreeNode<T> CheckNode(T value, BinaryTreeNode<T> node, bool isRight)
+        {
+            if ((isRight ? node.Right : node.Left) == null) return null!;
+            else if ((isRight ? node.Right : node.Left)!.Data.Equals(value))
+            {
+                if (TryUnlink((isRight ? node.Right : node.Left)!))
+                {
+                    if (isRight) node.Right = null!;
+                    else node.Left = null!;
+                    return null!;
+                }
+                return (isRight ? node.Right : node.Left)!;
+            }
+            else return PrepareDelete(value, (isRight ? node.Right : node.Left)!);
+        }
 
         private bool TryUnlink(BinaryTreeNode<T> node)
         {
