@@ -24,26 +24,20 @@ namespace BinaryTree
 
         public void Insert(T value)
         {
-            if (_root == null)
-            {
-                _root = new BinaryTreeNode<T>(value);
-            }
-            else 
-            {
-                Insert(value, _root);
-            }
+            if (_root == null) _root = new BinaryTreeNode<T>(value);
+            else Insert(value, _root);
         }
 
         private void Insert(T value,BinaryTreeNode<T> current)
         {
-            int compare = value.CompareTo(current.Data);
+            int compare = value.CompareTo(current.Data);                                    //Überprüft ob größer(1) kleiner(-1) oder gleich(0)
             switch (compare) 
             {
-                case -1:
-                    if (current.Left == null) current.Left = new BinaryTreeNode<T>(value);
-                    else Insert(value, current.Left);
+                case -1:                                                                    // Wenn kleiner, überprüfe ob Links frei ist 
+                    if (current.Left == null) current.Left = new BinaryTreeNode<T>(value);  // ja: node wird initalisiert und eine Referenz auf Links gelegt
+                    else Insert(value, current.Left);                                       // nein: überprüfe das referenzierte Linke Objekt indem die Methode sich selbst aufruft.
                     break;
-                case 0: 
+                case 0:         //Wenn der Wert gleich groß ist, default rechts überprüfen.
                 case 1:
                     if (current.Right == null) current.Right = new BinaryTreeNode<T>(value);
                     else Insert(value, current.Right);
@@ -51,20 +45,12 @@ namespace BinaryTree
             }
         } 
 
-        public void Clear()
-        {
-            _root = null!;
-        }
-
-        public bool Contains(T value)
+        public void Clear() => _root = null!;
+      
+        public bool Contains(T value) //Überprüft on Search den Wert finden kann und gibt entsprechend einen bool zurück.
         {
             if (_root!.Data.Equals(value)) return true;
-            else return Contains(value, _root);
-        }
-
-        private bool Contains(T value, BinaryTreeNode<T> current)
-        {
-            if (Search(value) != null) return true;
+            else if (Search(value) != null) return true;
             return false;
         }
 
@@ -72,12 +58,16 @@ namespace BinaryTree
         {
             BinaryTreeNode<T> deleteThis = default!;
 
-            if (_root != null && _root.Data.Equals(value)) deleteThis = _root;
-            else deleteThis = PrepareDelete(value, _root!);
+            if (_root != null && value.Equals(_root.Data)) deleteThis = _root; //Checkt ob _root null ist oder der zu löschende Wert in _root ist.
+            else deleteThis = PrepareDelete(value, _root!);                 //PrepareDelete sucht sich die Node, die gelöscht werden soll (und löscht diese wenn Left & Right null sind) ansonsten gibt sie die node zurück. 
 
-            if (deleteThis == null) return;
-            
-            if (deleteThis.Left != null && deleteThis.Right == null)       //Wenn links belegt und rechts frei ist kann der Folgeknoten einfach ersetzt werde, das selbe mit rechts.
+            if (deleteThis == default) return;
+
+            if (deleteThis.Left == null && deleteThis.Right == null)        //Kann nur bei Root treffen da jede andere Möglichkeit in der Methode PrepareDelete abgefangen wird.
+            {
+                _root = null!;
+            }
+            else if (deleteThis.Left != null && deleteThis.Right == null)       //Wenn links belegt und rechts frei ist kann der Folgeknoten einfach ersetzt werde, das selbe mit rechts.
             {
                 Replace(deleteThis, deleteThis.Left);
             }
@@ -87,7 +77,16 @@ namespace BinaryTree
             }
             else                        
             {
-                SearchReplacementNode(deleteThis, deleteThis.Left!);            
+                //SearchReplacementNode(deleteThis, deleteThis.Left!);
+
+                //TODO: Mach das schöner
+                BinaryTreeNode<T> replacementNode = SearchReplacementNode(deleteThis, deleteThis.Left);
+                if (replacementNode != null)
+                {
+                    deleteThis.Data = replacementNode.Data;
+                    deleteThis.Left.Right = replacementNode.Left;
+
+                }
             }
         }
 
@@ -140,12 +139,12 @@ namespace BinaryTree
         {
             BinaryTreeNode<T> replacementNode;
             if (checkNode.Right == null && checkNode.Left == null)
-            {  
-               return checkNode;
+            {
+                return  checkNode;
             }
             else if (checkNode.Right == null && checkNode.Left != null)
             {
-                return checkNode;
+                return  checkNode;
             }
             else 
             {
@@ -179,6 +178,7 @@ namespace BinaryTree
 
         public BinaryTreeNode<T> Search(T value)   //Gibt die Referenz zum aktuellen Objekt anstatt eine Kopie zurück, nicht das beste ich weiß :D
         {
+            if (_root == null) return null;
             if (_root!.Data.Equals(value))
             {
                 return _root;
