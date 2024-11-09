@@ -39,6 +39,11 @@
             Console.Write("\n\n50 gelöscht:\n");
             theTree.PrintInorder();
             Console.WriteLine();
+
+            theTree.Invert();
+            Console.Write("\n\nInvert:\n");
+            theTree.PrintInorder();
+            Console.WriteLine();
         }
 
         public static void TestString()

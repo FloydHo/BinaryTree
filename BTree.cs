@@ -201,5 +201,22 @@ namespace BinaryTree
                 default: return null!;
             }
         }
+
+        public void Invert()
+        {
+            if(_root != null) Invert(_root!);
+        }
+
+        private void Invert(BinaryTreeNode<T> node)
+        {
+            if (node == null) return;
+            {
+                Invert(node.Left);
+                Invert(node.Right);
+                BinaryTreeNode<T> tmp = node.Left;
+                node.Left = node.Right;
+                node.Right = tmp;
+            }
+        }
     }
 }
